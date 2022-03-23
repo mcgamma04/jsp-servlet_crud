@@ -9,23 +9,25 @@ import com.aptech.employee.Register;
 import com.aptech.miodel.Employeedb;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.jws.WebService;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author user
  */
-@WebServlet("/register")
-public class RegsiterServlet extends HttpServlet {
-    Employeedb epd =  new Employeedb();
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+    Employeedb emp =  new Employeedb();
+    Register register =  new Register();
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -43,10 +45,10 @@ public class RegsiterServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet RegsiterServlet</title>");            
+            out.println("<title>Servlet LoginServlet</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet RegsiterServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet LoginServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -65,7 +67,7 @@ public class RegsiterServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 //        processRequest(request, response);
- RequestDispatcher dispatcher = request.getRequestDispatcher("register.jsp");
+RequestDispatcher dispatcher = request.getRequestDispatcher("login.jsp");
         dispatcher.forward(request, response);
     }
 
@@ -81,28 +83,25 @@ public class RegsiterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 //        processRequest(request, response);
-String firstname = request.getParameter("firtsname");
-String lastname =  request.getParameter("lastname");
-String password =  request.getParameter("password");
-String email = request.getParameter("email");
+String email =  request.getParameter("email");
+String password = request.getParameter("password");
 
-Register reg =  new Register();
-reg.setFirtsname(firstname);
-reg.setLastname(lastname);
-reg.setPassword(password);
-reg.setEmail(email);
+register.setEmail(email);
+register.setPassword(password);
+
         try {
-            epd.Signup(reg);
-            epd.Users(reg);
-           RequestDispatcher dispatcher = request.getRequestDispatcher("success.jsp");
-        dispatcher.forward(request, response);
-        } catch (SQLException ex) {
-            Logger.getLogger(RegsiterServlet.class.getName()).log(Level.SEVERE, null, ex);
+            if(emp.UserLogin(register)){
+                 HttpSession session = request.getSession();
+              session.setAttribute("email", email);
+           response.sendRedirect("dashboard.jsp");
+                
+            } else{
+               response.sendRedirect("login.jsp?msg=loginfail"); 
+            }  
+        
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(RegsiterServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LoginServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-
 
     }
 
